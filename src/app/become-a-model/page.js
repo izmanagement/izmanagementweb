@@ -11,9 +11,8 @@ import Step2 from '../../components/casting-form/Step2';
 import Step3 from '../../components/casting-form/Step3';
 
 export default function BecomeAModelPage() {
-    // --- Credenciales de Cloudinary (¡REEMPLAZAR!) ---
-    const CLOUDINARY_CLOUD_NAME = "TU_CLOUD_NAME";
-    const CLOUDINARY_UPLOAD_PRESET = "TU_UPLOAD_PRESET";
+    const CLOUDINARY_CLOUD_NAME = "dnl6qgwds";
+    const CLOUDINARY_UPLOAD_PRESET = "casting_uploads";
 
     const [step, setStep] = useState(1);
     const [formData, setFormData] = useState({
@@ -33,10 +32,7 @@ export default function BecomeAModelPage() {
         script.src = "https://widget.cloudinary.com/v2.0/global/all.js";
         script.async = true;
         document.body.appendChild(script);
-
-        return () => {
-            document.body.removeChild(script);
-        }
+        return () => { document.body.removeChild(script); }
     }, []);
 
     const handleInputChange = (e) => {
@@ -46,66 +42,75 @@ export default function BecomeAModelPage() {
 
     const handlePhoneChange = {
         onCodeChange: (code) => setFormData(prev => ({ ...prev, phone: { ...prev.phone, code } })),
-        onNumberChange: (e) => {
-            setFormData(prev => ({ ...prev, phone: { ...prev.phone, number: e.target.value } }));
-        },
+        onNumberChange: (e) => setFormData(prev => ({ ...prev, phone: { ...prev.phone, number: e.target.value } })),
     };
     
     const handleFileUpload = (fileType) => {
-        if (!window.cloudinary) {
-            console.error("El widget de Cloudinary no está listo.");
-            return;
-        }
-
-        // Se crea la ruta de la carpeta dinámica
+        if (!window.cloudinary) { console.error("El widget de Cloudinary no está listo."); return; }
         const date = new Date();
         const year = date.getFullYear();
         const month = date.toLocaleString('es-ES', { month: 'long' });
         const applicantName = formData.fullName.trim().replace(/\s+/g, '_') || 'sin_nombre';
         const dynamicFolder = `casting/${year}/${month}/${applicantName}`;
-
         const isVideo = fileType === 'video';
-
         const options = {
             cloudName: "dnl6qgwds",
             uploadPreset: "casting_uploads",
-            folder: dynamicFolder, // <-- AQUÍ SE USA LA CARPETA DINÁMICA
+            folder: dynamicFolder,
             sources: ['local', 'url', 'camera', 'instagram'],
             multiple: false,
             maxFiles: 1,
             cropping: !isVideo,
             resourceType: isVideo ? 'video' : 'image',
-            clientAllowedFormats: isVideo ? ['mp4', 'mov', 'avi'] : ['jpg', 'jpeg', 'png', 'heic'],
+            clientAllowedFormats: isVideo ? ['mp4', 'mov'] : ['jpg', 'jpeg', 'png', 'heic'],
             maxFileSize: isVideo ? 100000000 : 10000000,
         };
-
         const myWidget = window.cloudinary.createUploadWidget(options, (error, result) => { 
-            if (error) {
-                console.error("Error de Cloudinary:", error);
-                setErrors(prev => ({...prev, files: 'Hubo un error al subir el archivo.'}));
-                return;
-            }
+            if (error) { console.error("Error de Cloudinary:", error); return; }
             if (result && result.event === "success") { 
-                console.log('¡Subida exitosa! Info: ', result.info);
                 setUploadedFiles(prev => ({ ...prev, [fileType]: result.info.secure_url }));
-                setErrors(prev => ({...prev, files: null}));
             }
         });
         myWidget.open();
     };
 
+    // CAMBIO: La función handleSubmit ahora llama a nuestra API
     const handleSubmit = async () => {
         setIsSubmitting(true);
-        console.log("Enviando datos al backend...");
-        // Aquí irá la lógica para enviar a Vercel KV
-        // Por ahora, simulamos un envío y avanzamos al paso final
-        setTimeout(() => {
+        setErrors({});
+
+        // Combinar todos los datos en un solo objeto
+        const finalApplication = {
+            ...formData,
+            phone: `${formData.phone.code} ${formData.phone.number}`, // Unir el número de teléfono
+            files: uploadedFiles,
+            submittedAt: new Date().toISOString(),
+        };
+
+        try {
+            const response = await fetch('/api/submit', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(finalApplication),
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                console.log("Aplicación guardada con ID:", result.applicationId);
+                setStep(3); // Avanzar a la pantalla de confirmación
+            } else {
+                setErrors({ submit: 'Hubo un error al enviar tu aplicación. Inténtalo de nuevo.' });
+            }
+        } catch (error) {
+            console.error("Error de red o al enviar:", error);
+            setErrors({ submit: 'No se pudo conectar con el servidor. Revisa tu conexión.' });
+        } finally {
             setIsSubmitting(false);
-            setStep(3); // Avanzar a la pantalla de confirmación
-        }, 1500);
+        }
     };
 
-    const nextStep = () => setStep(s => (s < 2 ? s + 1 : s)); // Solo hasta el paso 2
+    const nextStep = () => setStep(s => (s < 2 ? s + 1 : s));
     const prevStep = () => setStep(s => (s > 1 ? s - 1 : s));
 
     const renderStepContent = () => {
@@ -148,6 +153,7 @@ export default function BecomeAModelPage() {
                         <div className="lg:col-span-8">
                             <div>
                                 {renderStepContent()}
+                                {errors.submit && <p className="text-red-500 text-center mt-4">{errors.submit}</p>}
                                 <div className="flex items-center justify-between mt-12">
                                     <button onClick={prevStep} className={`inline-flex items-center justify-center px-8 py-4 text-sm font-bold tracking-wider uppercase text-gray-500 hover:text-black focus:outline-none transition-all duration-300 ${step > 1 ? 'opacity-100' : 'opacity-0'}`}>
                                         <ArrowLeft size={16} className="mr-2" /> Anterior
