@@ -3,6 +3,7 @@ import { kv } from '@vercel/kv';
 import { notFound } from 'next/navigation';
 import Navbar from '../../../components/Navbar';
 import Footer from '../../../components/Footer';
+// SE ELIMINÓ LA LÍNEA DE IMPORTACIÓN DE DownloadButton
 
 async function getApplicationData(id) {
   try {
@@ -25,7 +26,7 @@ export default async function ProfilePage({ params }) {
   const DetailItem = ({ label, value }) => (
     <div>
       <p className="text-sm text-gray-500">{label}</p>
-      <p className="text-lg font-medium text-black">{value || 'No especificado'}</p>
+      <p className="text-lg font-medium text-black break-words">{value || 'No especificado'}</p>
     </div>
   );
 
@@ -33,25 +34,27 @@ export default async function ProfilePage({ params }) {
     <div className="flex flex-col min-h-screen bg-gray-50 text-gray-900">
       <Navbar />
       <main className="flex-grow w-full max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16">
           
-          <div className="lg:col-span-1">
-            <h1 className="text-4xl font-bold tracking-tighter">{data.fullName}</h1>
-            <p className="text-lg text-gray-600 mt-2">@{data.instagram}</p>
-            
-            <div className="mt-8 space-y-4 border-t pt-6">
-              <DetailItem label="Email" value={data.email} />
-              <DetailItem label="País" value={data.country} />
-              <DetailItem label="Teléfono" value={data.phone} />
-              <DetailItem label="Estatura" value={`${data.height} cm`} />
-              <DetailItem label="Género" value={data.gender} />
-            </div>
+          <div className="lg:col-span-4">
+            <div className="lg:sticky lg:top-32">
+              <h1 className="text-4xl font-bold tracking-tighter break-words">{data.fullName}</h1>
+              <p className="text-lg text-gray-600 mt-2 break-words">@{data.instagram}</p>
+              
+              <div className="mt-8 space-y-4 border-t pt-6">
+                <DetailItem label="Email" value={data.email} />
+                <DetailItem label="País" value={data.country} />
+                <DetailItem label="Teléfono" value={data.phone} />
+                <DetailItem label="Estatura" value={`${data.height} cm`} />
+                <DetailItem label="Género" value={data.gender} />
+              </div>
 
-            {/* CAMBIO: El botón de descarga ha sido eliminado */}
+              {/* SE ELIMINÓ EL DIV Y EL COMPONENTE DownloadButton */}
+            </div>
           </div>
 
-          <div className="lg:col-span-2">
-            <div className="grid grid-cols-1 gap-6">
+          <div className="lg:col-span-8">
+            <div className="grid grid-cols-1 gap-8">
               {data.files?.facePhoto && (
                 <div>
                   <h2 className="text-xl font-semibold mb-2">Foto de Rostro</h2>
