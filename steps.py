@@ -1,3 +1,96 @@
+import os
+
+# --- Contenido Actualizado de los Archivos ---
+
+# 1. Step2.js (Con la lógica para mostrar imágenes de ejemplo según el género)
+step2_code = """
+// src/components/casting-form/Step2.js
+import React from 'react';
+import { UploadCloud, CheckCircle, Image as ImageIcon, Video } from 'lucide-react';
+
+// --- URLs de las Imágenes de Ejemplo ---
+// ¡REEMPLAZA ESTAS URLS CON LAS TUYAS DE CLOUDINARY!
+const exampleImages = {
+  female: {
+    facePhoto: 'https://placehold.co/400x600/f0f0f0/333?text=Ejemplo\\nRostro\\nFemenino',
+    mediumPhoto: 'https://placehold.co/400x600/f0f0f0/333?text=Ejemplo\\nMedio\\nCuerpo',
+    fullBodyPhoto: 'https://placehold.co/400x600/f0f0f0/333?text=Ejemplo\\nCuerpo\\nCompleto',
+    video: 'https://placehold.co/400x600/f0f0f0/333?text=Ejemplo\\nVideo\\nPresentacion',
+  },
+  male: {
+    facePhoto: 'https://placehold.co/400x600/e0e0e0/333?text=Ejemplo\\nRostro\\nMasculino',
+    mediumPhoto: 'https://placehold.co/400x600/e0e0e0/333?text=Ejemplo\\nMedio\\nCuerpo',
+    fullBodyPhoto: 'https://placehold.co/400x600/e0e0e0/333?text=Ejemplo\\nCuerpo\\nCompleto',
+    video: 'https://placehold.co/400x600/e0e0e0/333?text=Ejemplo\\nVideo\\nPresentacion',
+  }
+};
+
+const UploadField = ({ title, fileType, onUpload, uploadedFileUrl, exampleImageUrl }) => {
+    const isUploaded = !!uploadedFileUrl;
+    const isVideo = fileType === 'video';
+
+    return (
+        <div className="w-full text-center">
+            <div className="relative w-full aspect-[3/4] bg-gray-100 border border-dashed border-gray-300 flex items-center justify-center overflow-hidden">
+                {isUploaded ? (
+                    isVideo ? (
+                        <video key={uploadedFileUrl} controls className="w-full h-full object-cover">
+                            <source src={uploadedFileUrl} type="video/mp4" />
+                            Tu navegador no soporta el tag de video.
+                        </video>
+                    ) : (
+                        <img src={uploadedFileUrl} alt={`Vista previa de ${title}`} className="w-full h-full object-cover" />
+                    )
+                ) : (
+                  // CAMBIO: Ahora muestra la imagen de ejemplo real
+                  <img src={exampleImageUrl} alt={`Ejemplo de ${title}`} className="w-full h-full object-cover" />
+                )}
+            </div>
+
+            <div className="mt-4">
+                 <button
+                    type="button"
+                    onClick={() => onUpload(fileType)}
+                    className={`w-full inline-flex items-center justify-center px-4 py-3 text-sm font-medium transition-colors ${
+                        isUploaded
+                            ? 'bg-green-100 text-green-800'
+                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                >
+                    {isUploaded ? <CheckCircle size={16} className="mr-2" /> : <UploadCloud size={16} className="mr-2" />}
+                    {isUploaded ? 'Cambiar Archivo' : 'Subir Archivo'}
+                </button>
+                <p className="mt-2 text-xs text-gray-500">
+                    Tamaño máximo: {isVideo ? '100 MB' : '10 MB'}.
+                </p>
+            </div>
+        </div>
+    );
+};
+
+// CAMBIO: El componente ahora recibe el 'gender' seleccionado
+const Step2 = ({ uploadedFiles, onUpload, error, gender }) => {
+    // Se elige el set de imágenes correcto. Si no se ha seleccionado género, se usa el femenino por defecto.
+    const currentExamples = gender === 'Masculino' ? exampleImages.male : exampleImages.female;
+
+    return (
+        <div className="animate-fade-in">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-10">
+                <UploadField title="Foto de Rostro" fileType="facePhoto" onUpload={onUpload} uploadedFileUrl={uploadedFiles.facePhoto} exampleImageUrl={currentExamples.facePhoto} />
+                <UploadField title="Foto Medio Cuerpo" fileType="mediumPhoto" onUpload={onUpload} uploadedFileUrl={uploadedFiles.mediumPhoto} exampleImageUrl={currentExamples.mediumPhoto} />
+                <UploadField title="Foto Cuerpo Completo" fileType="fullBodyPhoto" onUpload={onUpload} uploadedFileUrl={uploadedFiles.fullBodyPhoto} exampleImageUrl={currentExamples.fullBodyPhoto} />
+                <UploadField title="Video de Presentación" fileType="video" onUpload={onUpload} uploadedFileUrl={uploadedFiles.video} exampleImageUrl={currentExamples.video} />
+            </div>
+            {error && <p className="text-red-500 text-sm mt-4 text-center">{error}</p>}
+        </div>
+    );
+};
+
+export default Step2;
+"""
+
+# 2. become-a-model/page.js (Actualizado para pasar el género al Step2)
+become_a_model_page_code = """
 // src/app/become-a-model/page.js
 "use client";
 
@@ -50,7 +143,7 @@ export default function BecomeAModelPage() {
         const date = new Date();
         const year = date.getFullYear();
         const month = date.toLocaleString('es-ES', { month: 'long' });
-        const applicantName = formData.fullName.trim().replace(/\s+/g, '_') || 'sin_nombre';
+        const applicantName = formData.fullName.trim().replace(/\\s+/g, '_') || 'sin_nombre';
         const dynamicFolder = `casting/${year}/${month}/${applicantName}`;
         const isVideo = fileType === 'video';
 
@@ -199,3 +292,36 @@ export default function BecomeAModelPage() {
         </div>
     );
 }
+"""
+
+# --- Lógica del Script ---
+
+def create_or_update_file(path, content):
+    """Crea o actualiza un archivo con el contenido especificado."""
+    try:
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        with open(path, 'w', encoding='utf-8') as f:
+            f.write(content.strip())
+        print(f"✅ Archivo actualizado: {path}")
+    except Exception as e:
+        print(f"❌ Error al actualizar el archivo {path}: {e}")
+
+def main():
+    """Función principal para añadir imágenes de ejemplo dinámicas."""
+    print("--- Añadiendo Imágenes de Ejemplo Dinámicas ---")
+
+    files_to_update = {
+        "src/components/casting-form/Step2.js": step2_code,
+        "src/app/become-a-model/page.js": become_a_model_page_code,
+    }
+
+    for path, content in files_to_update.items():
+        create_or_update_file(path, content)
+        
+    print("\\n--- ¡Funcionalidad Añadida! ---")
+    print("IMPORTANTE: Abre 'src/components/casting-form/Step2.js' y reemplaza las URLs de ejemplo con las tuyas.")
+    print("Reinicia tu servidor ('npm run dev') para ver los cambios.")
+
+
+if __name__ == "__main__":
+    main()
