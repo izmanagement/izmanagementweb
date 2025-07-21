@@ -76,7 +76,7 @@ export default function BecomeAModelPage() {
                     inactiveTabIcon: "#555A5F",
                     error: "#F44235",
                     inProgress: "#0078FF",
-                    complete: "#20B832",
+                    complete: "#000000ff",
                     sourceBg: "#F9FAFB"
                 },
                 fonts: {

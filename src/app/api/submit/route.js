@@ -20,7 +20,7 @@ const createEmailHtml = ({ fullName, instagram, height, profileLink }) => `
       .info-label { font-size: 14px; color: #5f6368; margin-bottom: 0; }
       .info-value { font-size: 18px; font-weight: bold; margin-top: 0; color: #000; }
       .button-container { margin-top: 32px; text-align: center; }
-      .button { background-color: #000000; border-radius: 3px; color: #fff; font-size: 16px; text-decoration: none; padding: 12px 24px; font-weight: bold; }
+      .button { background-color: #000000; border-radius: 3px; color: #fff !important; font-size: 16px; text-decoration: none; padding: 12px 24px; font-weight: bold; }
     </style>
   </head>
   <body>
