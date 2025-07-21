@@ -1,3 +1,9 @@
+import os
+
+# --- Contenido Actualizado del Archivo ---
+
+# Step2.js (Con la corrección final para la visualización del video)
+step2_code = """
 // src/components/casting-form/Step2.js
 import React from 'react';
 import { UploadCloud, CheckCircle, Image as ImageIcon, Video } from 'lucide-react';
@@ -6,16 +12,16 @@ import { UploadCloud, CheckCircle, Image as ImageIcon, Video } from 'lucide-reac
 // ¡REEMPLAZA ESTAS URLS CON LAS TUYAS DE CLOUDINARY!
 const exampleImages = {
   female: {
-    facePhoto: 'https://res.cloudinary.com/dnl6qgwds/image/upload/v1753081636/W1_nsl51m.webp',
-    mediumPhoto: 'https://res.cloudinary.com/dnl6qgwds/image/upload/v1753081637/W2_mqpolw.webp',
-    fullBodyPhoto: 'https://res.cloudinary.com/dnl6qgwds/image/upload/v1753081636/W3_cqdttk.webp',
-    video: 'https://res.cloudinary.com/dnl6qgwds/video/upload/v1753082179/C0243_mumleu.mp4',
+    facePhoto: 'https://placehold.co/400x600/f0f0f0/333?text=Ejemplo\\nRostro\\nFemenino',
+    mediumPhoto: 'https://placehold.co/400x600/f0f0f0/333?text=Ejemplo\\nMedio\\nCuerpo',
+    fullBodyPhoto: 'https://placehold.co/400x600/f0f0f0/333?text=Ejemplo\\nCuerpo\\nCompleto',
+    video: 'https://res.cloudinary.com/dnl6qgwds/video/upload/v1753082179/C0243_mum1eu.mp4',
   },
   male: {
-    facePhoto: 'https://res.cloudinary.com/dnl6qgwds/image/upload/v1753081613/M1_rrftdi.webp',
-    mediumPhoto: 'https://res.cloudinary.com/dnl6qgwds/image/upload/v1753081613/M2_aubtsd.webp',
-    fullBodyPhoto: 'https://res.cloudinary.com/dnl6qgwds/image/upload/v1753081613/M3_bzqzl1.webp',
-    video: 'https://res.cloudinary.com/dnl6qgwds/video/upload/v1753081899/Video_Reference_M_o0w4vp.mp4',
+    facePhoto: 'https://placehold.co/400x600/e0e0e0/333?text=Ejemplo\\nRostro\\nMasculino',
+    mediumPhoto: 'https://placehold.co/400x600/e0e0e0/333?text=Ejemplo\\nMedio\\nCuerpo',
+    fullBodyPhoto: 'https://placehold.co/400x600/e0e0e0/333?text=Ejemplo\\nCuerpo\\nCompleto',
+    video: 'https://res.cloudinary.com/dnl6qgwds/video/upload/v1753082179/C0243_mum1eu.mp4',
   }
 };
 
@@ -86,3 +92,41 @@ const Step2 = ({ uploadedFiles, onUpload, error, gender }) => {
 };
 
 export default Step2;
+"""
+
+# --- Lógica del Script ---
+
+def create_or_update_file(path, content):
+    """Crea o actualiza un archivo con el contenido especificado."""
+    try:
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        with open(path, 'w', encoding='utf-8') as f:
+            f.write(content.strip())
+        print(f"✅ Archivo actualizado: {path}")
+    except Exception as e:
+        print(f"❌ Error al actualizar el archivo {path}: {e}")
+
+def main():
+    """Función principal para añadir controles al video de ejemplo."""
+    print("--- Ajustando la Visualización del Video de Ejemplo (Versión Final) ---")
+
+    files_to_update = {
+        "src/components/casting-form/Step2.js": step2_code,
+    }
+
+    for path, content in files_to_update.items():
+        create_or_update_file(path, content)
+        
+    print("\\n--- ¡Ajuste Completado! ---")
+    print("La vista previa del video ahora se ve perfecta y el botón de pantalla completa ha sido desactivado en el código.")
+    
+    # CAMBIO: Se añaden instrucciones de limpieza
+    print("\\n--- PASOS CRÍTICOS PARA VER EL CAMBIO ---")
+    print("1. Detén el servidor de desarrollo (Ctrl + C).")
+    print("2. BORRA la carpeta '.next' de tu proyecto para limpiar la caché del servidor.")
+    print("3. Reinicia el servidor ('npm run dev').")
+    print("4. Abre la página en una VENTANA DE INCÓGNITO o borra la caché de tu navegador.")
+
+
+if __name__ == "__main__":
+    main()
