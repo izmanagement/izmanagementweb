@@ -1,3 +1,9 @@
+import os
+
+# --- Contenido Actualizado del Archivo ---
+
+# become-a-model/page.js (Con el widget de Cloudinary personalizado y la corrección de la interfaz)
+become_a_model_page_code = """
 // src/app/become-a-model/page.js
 "use client";
 
@@ -50,7 +56,7 @@ export default function BecomeAModelPage() {
         const date = new Date();
         const year = date.getFullYear();
         const month = date.toLocaleString('es-ES', { month: 'long' });
-        const applicantName = formData.fullName.trim().replace(/\s+/g, '_') || 'sin_nombre';
+        const applicantName = formData.fullName.trim().replace(/\\s+/g, '_') || 'sin_nombre';
         const dynamicFolder = `casting/${year}/${month}/${applicantName}`;
         const isVideo = fileType === 'video';
 
@@ -213,3 +219,35 @@ export default function BecomeAModelPage() {
         </div>
     );
 }
+"""
+
+# --- Lógica del Script ---
+
+def create_or_update_file(path, content):
+    """Crea o actualiza un archivo con el contenido especificado."""
+    try:
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        with open(path, 'w', encoding='utf-8') as f:
+            f.write(content.strip())
+        print(f"✅ Archivo actualizado: {path}")
+    except Exception as e:
+        print(f"❌ Error al actualizar el archivo {path}: {e}")
+
+def main():
+    """Función principal para personalizar el widget de Cloudinary."""
+    print("--- Personalizando el Widget de Cloudinary y Corrigiendo UI Final ---")
+
+    files_to_update = {
+        "src/app/become-a-model/page.js": become_a_model_page_code,
+    }
+
+    for path, content in files_to_update.items():
+        create_or_update_file(path, content)
+        
+    print("\\n--- ¡Personalización Completada! ---")
+    print("Se ha actualizado la configuración del widget y la lógica de los botones de navegación.")
+    print("Reinicia tu servidor ('npm run dev') para ver los cambios.")
+
+
+if __name__ == "__main__":
+    main()
