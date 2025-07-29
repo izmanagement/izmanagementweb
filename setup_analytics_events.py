@@ -1,3 +1,73 @@
+import os
+
+# --- Contenido de los Archivos ---
+
+# 1. NUEVO: Archivo de ayuda para Google Analytics
+gtag_helper_code = """
+// src/lib/gtag.js
+
+// Función para enviar eventos a Google Analytics
+export const event = ({ action, category, label, value }) => {
+  // Asegurarse de que gtag esté disponible en el objeto window
+  if (typeof window.gtag === 'function') {
+    window.gtag('event', action, {
+      event_category: category,
+      event_label: label,
+      value: value,
+    });
+  } else {
+    console.log("gtag no está disponible. Asegúrate de que el script de Google Analytics esté cargado.");
+  }
+};
+"""
+
+# 2. page.js (Homepage actualizada para enviar el evento de clic)
+homepage_code = """
+// src/app/page.js
+"use client"; // Se convierte en un componente de cliente para manejar el clic
+
+import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
+import Link from 'next/link';
+import * as gtag from '../lib/gtag'; // Se importa el archivo de ayuda
+
+export default function HomePage() {
+
+  // Se crea una función para manejar el clic y enviar el evento
+  const handleApplyClick = () => {
+    gtag.event({
+      action: 'start_application',
+      category: 'Casting Funnel',
+      label: 'Click en Aplicar Ahora',
+    });
+  };
+
+  return (
+    <div className="flex flex-col min-h-screen bg-gray-50 font-sans">
+      <Navbar />
+      <main className="flex-grow flex items-center justify-center">
+        <div className="text-center">
+            <h1 className="text-5xl font-bold tracking-tight text-gray-900">Bienvenido al Casting de IZ MANAGEMENT</h1>
+            <p className="mt-4 text-lg text-gray-600">Estamos buscando el próximo gran talento. ¿Eres tú?</p>
+            <div className="mt-8">
+                <Link 
+                  href="/become-a-model" 
+                  onClick={handleApplyClick} // Se añade el manejador de clic
+                  className="inline-block px-8 py-3 text-sm font-bold tracking-wider uppercase rounded-sm text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black transition-colors"
+                >
+                    Aplicar ahora
+                </Link>
+            </div>
+        </div>
+      </main>
+      <Footer />
+    </div>
+  )
+}
+"""
+
+# 3. become-a-model/page.js (Actualizada para enviar el evento de confirmación)
+become_a_model_page_code = """
 // src/app/become-a-model/page.js
 "use client";
 
@@ -55,7 +125,7 @@ export default function BecomeAModelPage() {
         let finalValue = value;
 
         if (name === 'fullName' || name === 'country') {
-            finalValue = value.replace(/[^a-zA-Z\s]/g, '');
+            finalValue = value.replace(/[^a-zA-Z\\s]/g, '');
         }
         if (name === 'height') {
             finalValue = value.replace(/,/g, '.').replace(/[^0-9.]/g, '');
@@ -77,7 +147,7 @@ export default function BecomeAModelPage() {
         const date = new Date();
         const year = date.getFullYear();
         const month = date.toLocaleString('es-ES', { month: 'long' });
-        const applicantName = formData.fullName.trim().replace(/\s+/g, '_') || 'sin_nombre';
+        const applicantName = formData.fullName.trim().replace(/\\s+/g, '_') || 'sin_nombre';
         const dynamicFolder = `casting/${year}/${month}/${applicantName}`;
         const isVideo = fileType === 'video';
 
@@ -133,7 +203,7 @@ export default function BecomeAModelPage() {
         const errorMessages = [];
         if (!formData.fullName.trim()) { newErrors.fullName = "El nombre es requerido."; errorMessages.push("El nombre completo es requerido."); }
         if (!formData.country.trim()) { newErrors.country = "El país es requerido."; errorMessages.push("El país es requerido."); }
-        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) { newErrors.email = "El email no es válido."; errorMessages.push("Por favor, introduce un email válido."); }
+        if (!/^[^\s@]+@[^\s@]+\\.[^\s@]+$/.test(formData.email)) { newErrors.email = "El email no es válido."; errorMessages.push("Por favor, introduce un email válido."); }
         if (!formData.phone.number.trim()) { newErrors.phone = "El teléfono es requerido."; errorMessages.push("El número de teléfono es requerido."); }
         if (!formData.height.trim()) { newErrors.height = "La estatura es requerida."; errorMessages.push("La estatura es requerida (en cm)."); }
         if (!formData.gender) { newErrors.gender = "El género es requerido."; errorMessages.push("Debes seleccionar un género."); }
@@ -266,3 +336,37 @@ export default function BecomeAModelPage() {
         </div>
     );
 }
+"""
+
+# --- Lógica del Script ---
+
+def create_or_update_file(path, content):
+    """Crea o actualiza un archivo con el contenido especificado."""
+    try:
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        with open(path, 'w', encoding='utf-8') as f:
+            f.write(content.strip())
+        print(f"✅ Archivo creado/actualizado: {path}")
+    except Exception as e:
+        print(f"❌ Error al crear el archivo {path}: {e}")
+
+def main():
+    """Función principal para añadir el seguimiento de eventos."""
+    print("--- Añadiendo Seguimiento de Eventos de Google Analytics ---")
+
+    files_to_update = {
+        "src/lib/gtag.js": gtag_helper_code,
+        "src/app/page.js": homepage_code,
+        "src/app/become-a-model/page.js": become_a_model_page_code,
+    }
+
+    for path, content in files_to_update.items():
+        create_or_update_file(path, content)
+        
+    print("\\n--- ¡Seguimiento de Eventos Implementado! ---")
+    print("Ahora podrás ver los eventos 'start_application' y 'submit_application' en tu panel de Google Analytics.")
+    print("Reinicia tu servidor y sube los cambios a GitHub para que se apliquen en tu sitio en línea.")
+
+
+if __name__ == "__main__":
+    main()
