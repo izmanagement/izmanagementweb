@@ -1,9 +1,8 @@
-// src/app/become-a-model/page.js
 "use client";
 
 import React, { useState, useEffect } from 'react';
 import { ArrowRight, ArrowLeft } from 'lucide-react';
-import * as gtag from '../../lib/gtag'; // Se importa el archivo de ayuda
+import { sendEvent } from '../../lib/gtag'; // Se importa el archivo de ayuda
 
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
@@ -30,17 +29,35 @@ export default function BecomeAModelPage() {
     const [modalErrors, setModalErrors] = useState([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    // Se añade un useEffect para detectar cuando se llega al paso 3
+    // --- SEGUIMIENTO DE EVENTOS ---
+
+    // Evento: submit_application (CORRECTO)
+    // Se dispara cuando se llega al paso 3 (confirmación).
     useEffect(() => {
-        // Si el paso es el 3 (confirmación), enviamos el evento
         if (step === 3) {
-            gtag.event({
+            sendEvent({
                 action: 'submit_application',
                 category: 'Casting Funnel',
                 label: 'Formulario enviado exitosamente',
             });
         }
-    }, [step]); // Este efecto se ejecuta cada vez que el 'step' cambia
+    }, [step]);
+
+    // Evento: upload_photos_complete (AÑADIDO)
+    // Se dispara una sola vez cuando las 3 fotos obligatorias están listas.
+    useEffect(() => {
+        const { facePhoto, mediumPhoto, fullBodyPhoto } = uploadedFiles;
+        if (facePhoto && mediumPhoto && fullBodyPhoto) {
+            // Usamos un flag para asegurarnos de que solo se envíe una vez.
+            if (!window.photosUploadedEventSent) {
+                sendEvent('upload_photos_complete');
+                window.photosUploadedEventSent = true; // Marcamos que ya se envió
+            }
+        }
+    }, [uploadedFiles]);
+
+
+    // --- FIN DE SEGUIMIENTO DE EVENTOS ---
 
     useEffect(() => {
         const script = document.createElement('script');
@@ -123,6 +140,12 @@ export default function BecomeAModelPage() {
             if (error) { console.error("Error de Cloudinary:", error); return; }
             if (result && result.event === "success") { 
                 setUploadedFiles(prev => ({ ...prev, [fileType]: result.info.secure_url }));
+                
+                // Evento: upload_video (AÑADIDO)
+                // Se dispara si el archivo subido es un video.
+                if (isVideo) {
+                    sendEvent('upload_video');
+                }
             }
         });
         myWidget.open();
@@ -160,6 +183,10 @@ export default function BecomeAModelPage() {
     };
 
     const handleSubmit = async () => {
+        // Evento: attempt_submission (AÑADIDO)
+        // Se dispara siempre que el usuario intenta finalizar la aplicación.
+        sendEvent('attempt_submission');
+
         if (!validateStep2()) {
             return;
         }
@@ -193,6 +220,9 @@ export default function BecomeAModelPage() {
     const nextStep = () => {
         if (step === 1) {
             if (validateStep1()) {
+                // Evento: complete_step1 (CORREGIDO)
+                // Se dispara al pasar exitosamente del paso 1 al 2.
+                sendEvent('complete_step1');
                 setStep(2);
             }
         }
