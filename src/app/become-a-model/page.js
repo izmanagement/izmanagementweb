@@ -12,7 +12,7 @@ import Step3 from '../../components/casting-form/Step3';
 import ErrorModal from '../../components/ErrorModal';
 
 export default function BecomeAModelPage() {
-    const CLOUDINARY_CLOUD_NAME = "dnl6qgwds";
+    const CLOUDINARY_CLOUD_NAME = "dajgnzim5";
     const CLOUDINARY_UPLOAD_PRESET = "casting_uploads";
 
     const [step, setStep] = useState(1);
