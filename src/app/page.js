@@ -101,7 +101,7 @@ export default function HomePage() {
                         </div>
 
                         <div className="max-w-3xl mx-auto">
-                            <h2 className="font-bold text-xl text-black">Para aplicar, asegúrate de tener a mano:</h2>
+                            <h2 className="font-bold text-xl text-black">Para aplicar, asegúrate de tener:</h2>
                             <ul className="mt-4 text-gray-600 text-lg space-y-2 md:space-y-0 md:flex md:justify-center md:space-x-8">
                                 <li>Una foto de rostro</li>
                                 <li>Una foto de medio cuerpo</li>
